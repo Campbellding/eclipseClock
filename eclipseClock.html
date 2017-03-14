@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Eclipse Clock</title>
+    <script src="http://code.createjs.com/easeljs-0.8.1.min.js"></script>
+    <script>
+        var stage, timeCircle, second, clockPad, minDot, hrDot;
+        var clockFrame = {
+            'width': 200
+        };
+        var circles = [];
+      
+        function init() {
+            stage = new createjs.Stage("demoCanvas");
+            
+              //draw clock pad 
+            clockPad = new createjs.Shape();
+            clockPad.graphics.beginFill("black").drawCircle(stage.canvas.width/2, stage.canvas.height/2, 100);
+            stage.addChild(clockPad)
+            
+            //draw minDot and hrDot
+            hrDot = new createjs.Shape();
+            minDot = new createjs.Shape()
+            hrDot.graphics.beginFill("white").drawCircle(0,0, 5);
+            stage.addChild(hrDot)
+            minDot.graphics.beginFill("white").drawCircle(0,0, 2);
+            stage.addChild(minDot)
+
+
+            var counter = 1;
+            var i = setInterval(function () {
+                addCircle(counter)
+                counter++;
+                if (counter === 61) {
+                    clearInterval(i);
+                }
+            }, 20);
+            
+            createjs.Ticker.on("tick", tick);
+            createjs.Ticker.setFPS(60);
+        }
+
+        function addCircle(second) {
+            var index = circles.length;
+            var randomColor = '#' + (Math.random() * 0xFFFFFF << 0).toString(16);
+            timeCircle = new createjs.Shape();
+            timeCircle.graphics.beginFill(randomColor).drawCircle(0, 0, 40);
+            timeCircle.alpha = 0;
+            var random = Math.random();
+            //random scale the circle a bit
+            timeCircle.scaleX = timeCircle.scaleY = random;
+            //convert seconds to position
+            var x = stage.canvas.width / 2 + (Math.sin((2 * Math.PI / 60) * second)) * (clockFrame.width / 2);
+            var y = stage.canvas.height / 2 - (Math.cos((2 * Math.PI / 60) * second)) * (clockFrame.width / 2);
+            //randomise the position a bit
+            x = x + Math.random() * 5 * (-1) ^ Math.round(random * 10);
+            y = y + Math.random() * 5 * (-1) ^ Math.round(random * 10);
+            console.log(x, y);
+            timeCircle.y = y;
+            timeCircle.x = x;
+            stage.addChild(timeCircle);
+            circles[index] = timeCircle;
+            
+            stage.setChildIndex(clockPad, stage.getNumChildren()-1);
+            stage.setChildIndex(minDot, stage.getNumChildren()-1);
+            stage.setChildIndex(hrDot, stage.getNumChildren()-1);
+        }
+
+        function tick(event) {
+            // time based
+            for (var i = 0; i < circles.length; i++) {
+               if(circles[i].alpha<0.5 && circles[i].name != 'done'){
+                   circles[i].alpha = circles[i].alpha + (event.delta) / 1000;
+               }else{
+                   circles[i].name = 'done'
+                circles[i].alpha = circles[i].alpha - (event.delta) / 60000;
+               }
+                if (circles[i].alpha <= 0) {
+                    stage.removeChild(circles[i]);
+                    circles.splice(i, 1)
+                }
+            }
+            stage.update(event);
+        }
+
+        var timer = setInterval(timerEvent, 1000);
+
+        function timerEvent() {
+            //get seconds
+            var date = new Date();
+            second = date.getSeconds();
+            addCircle(second)
+            addCircle(second)
+            addCircle(second)
+             
+             updateClock(date)
+            // console.log('child number: '+stage.getNumChildren())
+        }
+
+        function updateClock(time){
+        	var min = time.getMinutes();
+        	var hr = time.getHours();
+        	// console.log(min,hr)
+
+			//convert minutes to position
+            var xMin = stage.canvas.width / 2 + (Math.sin((2 * Math.PI / 60) * min)) * (200 / 2); 
+            var yMin = stage.canvas.height / 2 - (Math.cos((2 * Math.PI / 60) * min)) * (200 / 2); 
+            minDot.x = xMin; 
+            minDot.y = yMin;
+
+
+			//convert hours to position
+            var xHr = stage.canvas.width / 2 + (Math.sin((2 * Math.PI / 60) * hr)) * (150 / 2);
+            var yHr = stage.canvas.height / 2 - (Math.cos((2 * Math.PI / 60) * hr)) * (150 / 2);
+            hrDot.x = xHr;
+            hrDot.y = yHr;
+
+			console.log("xmin,ymin: "+xMin,yMin)
+            
+        }
+    </script>
+</head>
+<style type="text/css">
+	canvas{margin: auto;transform: translateY(-50%);position: relative;
+  top: 50%;}
+	body{background: #000;text-align: center;height: 100%;width: 100%;position: absolute;}
+</style>
+<body onload="init();">
+    <canvas id="demoCanvas" width="480" height="480"> alternate content </canvas>
+</body>
+
+</html>
