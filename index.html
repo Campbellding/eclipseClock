@@ -3,7 +3,7 @@
 
 <head>
     <title>Eclipse Clock</title>
-    <script src="http://code.createjs.com/easeljs-0.8.1.min.js"></script>
+    <script src="easeljs-0.8.1.min.js"></script>
     <script>
     var stage, timeCircle, second, clockPad, minDot, hrDot;
     var clockFrame = {
@@ -27,6 +27,8 @@
         minDot.graphics.beginFill("white").drawCircle(0, 0, 2);
         stage.addChild(minDot)
 
+        //position dots to clock position
+        updateClock(new Date())
 
         var counter = 1;
         var i = setInterval(function() {
